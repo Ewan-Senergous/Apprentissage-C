@@ -1,0 +1,11 @@
+node_modules/
+/build/
+/.svelte-kit/
+/dist/
+
+# binaires compilés des exercices
+exercices/**/bin/
+*.exe
+*.o
+*.obj
+*.out

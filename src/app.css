@@ -1,0 +1,150 @@
+@import 'tailwindcss';
+
+/* Design system repris de kmax-reporting (mêmes tokens, mêmes polices, mêmes variantes
+   françaises). Toute couleur passe par une var sémantique : jamais de valeur Tailwind brute
+   pour un élément métier. */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+	color-scheme: light;
+}
+
+/* Police de repli aux MÊMES métriques que Poppins (technique next/font) : tant que Poppins
+   (chargé en `display=swap`) n'est pas prête, Arial est redimensionnée pour occuper exactement
+   la même place → le swap ne provoque aucun reflow. */
+@font-face {
+	font-family: 'Poppins Fallback';
+	src: local('Arial');
+	ascent-override: 105%;
+	descent-override: 35%;
+	line-gap-override: 0%;
+	size-adjust: 112%;
+}
+
+@theme {
+	/* fonts */
+	--font-sans: 'Poppins', 'Poppins Fallback', -apple-system, system-ui, sans-serif;
+	/* Mono à ZÉRO NU (ni point ni barre) : le zéro pointé se relit comme un 8 à 12-13 px.
+	   Indispensable ici, tout le code C est affiché dans cette police. */
+	--font-mono: 'Chivo Mono', ui-monospace, monospace;
+
+	--color-primary-50: #f3f7fc;
+	--color-primary-100: #e5eff9;
+	--color-primary-200: #c6ddf1;
+	--color-primary-300: #93c2e6;
+	--color-primary-400: #5aa3d6;
+	--color-primary-500: #3487c3;
+	--color-primary-600: #246ba5;
+	--color-primary-700: #1f5685;
+	--color-primary-800: #1d496f;
+	--color-primary-900: #1b3a56;
+	--color-primary-950: #13283e;
+
+	--color-surface: #ffffff;
+	--color-surface-gray: #f3f4f6;
+	--color-bg: #f9fafb;
+	--color-on-surface: #111827;
+	--color-on-surface-muted: #4b5563;
+	--color-foreground: #111827;
+	--color-background: #ffffff;
+	--color-border: #e5e7eb;
+	--color-border-strong: #d1d5db;
+
+	--color-action-blue: #1d4ed8;
+	--color-action-green: #15803d;
+	--color-action-red: #b91c1c;
+	--color-action-yellow: #facc15;
+
+	/* tints sémantiques (fond pastel + texte saturé + bordure) */
+	--color-tint-blue-bg: #dbeafe;
+	--color-tint-blue-text: #1e40af;
+	--color-tint-blue-border: #60a5fa;
+
+	--color-tint-vert-bg: #dcfce7;
+	--color-tint-vert-text: #166534;
+	--color-tint-vert-border: #4ade80;
+
+	--color-tint-rouge-bg: #fee2e2;
+	--color-tint-rouge-text: #991b1b;
+	--color-tint-rouge-border: #f87171;
+
+	--color-tint-noir-bg: #f3f4f6;
+	--color-tint-noir-text: #1f2937;
+	--color-tint-noir-border: #9ca3af;
+
+	--color-tint-orange-bg: #ffedd5;
+	--color-tint-orange-text: #9a3412;
+	--color-tint-orange-border: #fb923c;
+
+	--color-tint-jaune-bg: #fef9c3;
+	--color-tint-jaune-text: #713f12;
+	--color-tint-jaune-border: #facc15;
+
+	--color-tint-purple-bg: #f3e8ff;
+	--color-tint-purple-text: #6b21a8;
+	--color-tint-purple-border: #c084fc;
+
+	/* Couleurs des 3 phases du parcours (Fondations / Cœur du C / Programmes réels).
+	   Une phase = une couleur, tenue partout : puce de module, barre de progression, filet
+	   de carte, numéro de module. */
+	/* Phase 1 = primary-600 et non primary-500 : ce token sert aussi de couleur de TEXTE (le
+	   numéro du module, 11-12 px). Le 500 (#3487c3) ne donne que 3.9:1 sur blanc, sous le
+	   4.5:1 exigé par WCAG AA ; le 600 monte à 5.6:1, au niveau des phases 2 (5.7) et 3 (5.0). */
+	--color-phase-1: #246ba5;
+	--color-phase-2: #7c3aed;
+	--color-phase-3: #15803d;
+
+	/* bloc de code : fond sombre unique du projet (le reste de l'app est en thème clair) */
+	--color-code-bg: #13283e;
+	--color-code-text: #e5eff9;
+	--color-code-muted: #93c2e6;
+
+	/* shadows */
+	--shadow-xs-soft: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+	--shadow-sm-soft: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	min-height: 100%;
+	background: var(--color-bg);
+	font-family: var(--font-sans);
+	color: var(--color-on-surface);
+}
+
+/* Gouttière de scrollbar réservée en permanence : sans ça, tout contenu qui allonge la page
+   la fait apparaître et TOUTE la mise en page glisse de ~15 px (dépliage d'un module, filtre). */
+html {
+	scrollbar-gutter: stable;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+button {
+	font-family: inherit;
+	cursor: pointer;
+}
+
+input,
+select,
+textarea {
+	font-family: inherit;
+}
+
+/* Zone tactile minimale (WCAG 2.5.5) sans changer la taille visuelle. */
+@media (pointer: coarse) {
+	.touch-target::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 44px;
+		height: 44px;
+		transform: translate(-50%, -50%);
+	}
+}
