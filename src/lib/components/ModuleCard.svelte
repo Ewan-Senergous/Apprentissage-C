@@ -3,7 +3,6 @@
 	import CircleCheck from '@lucide/svelte/icons/circle-check';
 	import type { Module } from '$lib/data/curriculum';
 	import { progression } from '$lib/progress.svelte';
-	import ProgressBar from './ProgressBar.svelte';
 	import { Badge } from './ui/badge';
 
 	interface Props {
@@ -26,11 +25,6 @@
 		<div class="tete">
 			<span class="num" style="color: {couleur}">{String(module.num).padStart(2, '0')}</span>
 			<span class="titre">{module.titre}</span>
-			{#if termine}
-				<CircleCheck size={16} class="ok" aria-label="Module terminé" />
-			{:else if courant}
-				<Badge variant="bleu">à faire</Badge>
-			{/if}
 			<ChevronRight size={16} class="fleche" aria-hidden="true" />
 		</div>
 
@@ -40,9 +34,16 @@
 			<span class="duree">{module.duree}</span>
 			<span class="sep" aria-hidden="true">·</span>
 			<span>{module.exercices.length} exercices</span>
+			{#if termine || courant}
+				<span class="etat">
+					{#if termine}
+						<CircleCheck size={16} class="ok" aria-label="Module terminé" />
+					{:else}
+						<Badge variant="bleu">à faire</Badge>
+					{/if}
+				</span>
+			{/if}
 		</div>
-
-		<ProgressBar valeur={valides} total={module.checkpoint.length} {couleur} hauteur={5} />
 	</div>
 </a>
 
@@ -50,22 +51,25 @@
 	.carte {
 		display: flex;
 		overflow: hidden;
-		border: 1px solid var(--color-border);
+		border: 1px solid var(--color-on-surface);
 		border-radius: 12px;
 		background: var(--color-surface);
-		box-shadow: var(--shadow-xs-soft);
 		color: inherit;
 		text-decoration: none;
 		transition:
-			box-shadow 140ms,
+			background-color 140ms,
 			border-color 140ms,
 			transform 140ms;
 	}
 
 	.carte:hover {
-		border-color: var(--color-border-strong);
-		box-shadow: var(--shadow-sm-soft);
+		background: var(--color-surface-gray);
 		transform: translateY(-1px);
+	}
+
+	/* Un module terminé garde son vert au survol : la teinte est son état, pas un effet. */
+	.termine:hover {
+		background: var(--color-tint-vert-bg);
 	}
 
 	.carte:focus-visible {
@@ -142,9 +146,17 @@
 
 	.pied {
 		display: flex;
+		align-items: center;
 		gap: 6px;
 		color: var(--color-on-surface-muted);
 		font-size: 11.5px;
+	}
+
+	/* L'état part à droite de la ligne : il se lit en balayant la colonne des cartes. */
+	.etat {
+		display: inline-flex;
+		align-items: center;
+		margin-left: auto;
 	}
 
 	.duree {

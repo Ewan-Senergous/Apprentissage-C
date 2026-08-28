@@ -90,9 +90,14 @@ pnpm lint        # prettier --check + eslint
 pnpm check       # svelte-check (types)
 ```
 
-`pnpm check` ne voit pas tout : c'est `eslint` qui attrape les échappements morts dans les
-template literals (un `.\compile.ps1` écrit avec une seule contre-oblique s'affiche
-`.compile.ps1` et la commande devient fausse pour l'apprenant). Lance les deux.
+Dans `curriculum.ts` et `methode.ts`, **toute chaîne qui contient une contre-oblique s'écrit
+``String.raw`...` ``** : le `\n` d'un printf, le `\0` d'une chaîne C, le `.\compile.ps1` d'une
+commande s'y écrivent avec UNE contre-oblique, exactement comme l'apprenant les lira. En
+chaîne ordinaire il en faudrait deux, et une seule oubliée affichait `.compile.ps1` — une
+commande fausse que `pnpm check` ne voit pas. Contrepartie : dans un `String.raw`, `\u2019`
+et `\t` ne sont plus interprétés, il faut y mettre le vrai caractère.
+
+`pnpm check` ne voit pas tout : lance aussi `eslint`, seul à attraper les échappements morts.
 
 Côté C, l'apprenant compile via `exercices/compile.ps1` (ou `gcc -Wall -Wextra -std=c17 -g`
 à la main). **Ne compile pas ses exercices à sa place pour « vérifier » :** lire la sortie

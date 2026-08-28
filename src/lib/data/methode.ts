@@ -50,6 +50,47 @@ export const SEANCE: Etape[] = [
 	}
 ];
 
+export type EtapeLancement = {
+	titre: string;
+	detail: string;
+	/**
+	 * Commande à taper telle quelle. Le jeton `{exercice}` est remplacé à l'affichage par le
+	 * chemin du premier exercice du module en cours, relatif à `exercices/` : la commande
+	 * montrée est toujours celle du module qu'on lit, jamais un exemple abstrait.
+	 */
+	commande?: string;
+};
+
+/**
+ * Le geste matériel, identique à tous les modules : où ouvrir le terminal, quel fichier créer,
+ * quoi taper pour compiler. Répété sur chaque page de module, parce que c'est exactement ce
+ * qu'on ne retient pas entre deux séances — et qu'un apprenant bloqué là n'apprend rien du C.
+ */
+export const LANCEMENT: EtapeLancement[] = [
+	{
+		titre: 'Ouvre un terminal PowerShell dans exercices/',
+		detail: String.raw`PowerShell, pas Git Bash : le script est un .ps1, et bash répond « command not found » après avoir avalé la contre-oblique de .\compile.ps1. Dans VS Code, c'est la flèche ∨ à côté du + du panneau Terminal. Et toujours depuis ce dossier, jamais depuis la racine du dépôt : sinon le script ne trouve pas ton fichier.`,
+		commande: 'cd exercices'
+	},
+	{
+		titre: 'Vérifie ton installation, une seule fois',
+		detail:
+			"À faire à la première séance, avant d'écrire une ligne. Si gcc n'est pas trouvé, le problème est dans ton PATH, pas dans ton code : autant le savoir tout de suite plutôt que de chercher une faute qui n'existe pas.",
+		commande: String.raw`.\compile.ps1 00-verification/test-installation.c`
+	},
+	{
+		titre: "Crée le fichier de l'exercice",
+		detail:
+			"Le dossier du module existe déjà, tu n'as rien à créer de ce côté. C'est le fichier .c que tu ajoutes dedans, avec le nom EXACT indiqué sur la carte de l'exercice : le script le cherche à cet endroit précis."
+	},
+	{
+		titre: 'Compile et lance',
+		detail:
+			"Le script affiche la ligne gcc complète avant de l'exécuter, compile avec -Wall -Wextra, lance le programme et te donne son code de retour. Elle est affichée pour que tu finisses par la connaître par cœur.",
+		commande: String.raw`.\compile.ps1 {exercice}`
+	}
+];
+
 export const PRINCIPES: Principe[] = [
 	{
 		id: 'clavier',
@@ -143,8 +184,7 @@ export const PRINCIPES: Principe[] = [
 		id: 'journal',
 		titre: 'Tiens un journal',
 		regle: 'Trois lignes par séance : fait / bloqué sur / compris.',
-		pourquoi:
-			"En C, les mêmes 15 erreurs reviennent en boucle (le & de scanf, le \\0, le free oublié). Les écrire crée un catalogue personnel qui, au bout d'un mois, vaut mieux que n'importe quel cours — parce que ce sont TES fautes.",
+		pourquoi: String.raw`En C, les mêmes 15 erreurs reviennent en boucle (le & de scanf, le \0, le free oublié). Les écrire crée un catalogue personnel qui, au bout d'un mois, vaut mieux que n'importe quel cours — parce que ce sont TES fautes.`,
 		enPratique: [
 			'Un fichier JOURNAL.md à la racine, une entrée datée par séance',
 			"Note le message d'erreur EXACT et sa cause réelle, pas « ça marchait pas »",

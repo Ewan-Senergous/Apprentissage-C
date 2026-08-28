@@ -1,15 +1,17 @@
 <script lang="ts">
-	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
-	import ArrowRight from '@lucide/svelte/icons/arrow-right';
+	import CircleArrowLeft from '@lucide/svelte/icons/circle-arrow-left';
+	import CircleArrowRight from '@lucide/svelte/icons/circle-arrow-right';
 	import Target from '@lucide/svelte/icons/target';
 	import TriangleAlert from '@lucide/svelte/icons/triangle-alert';
 	import FileCode from '@lucide/svelte/icons/file-code';
+	import Terminal from '@lucide/svelte/icons/terminal';
 	import { Shell, CodeBlock, Checklist, ProgressBar } from '$lib/components';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Alert from '$lib/components/ui/alert';
 	import * as Card from '$lib/components/ui/card';
 	import { PHASES, type Niveau } from '$lib/data/curriculum';
+	import { LANCEMENT } from '$lib/data/methode';
 	import { progression } from '$lib/progress.svelte';
 	import type { PageData } from './$types';
 
@@ -20,6 +22,15 @@
 	const valides = $derived(progression.valides(module.slug));
 	const termine = $derived(valides === module.checkpoint.length);
 
+	// Le script attend un chemin relatif à exercices/, pas au dépôt : c'est de là que se
+	// lancent toutes les commandes du parcours.
+	const relatif = (fichier: string) => fichier.replace(/^exercices\//, '');
+	const commandeExercice = (fichier: string) => `.\\compile.ps1 ${relatif(fichier)}`;
+
+	// `{exercice}` des étapes de lancement pointe sur le premier exercice DU module lu.
+	const exemple = $derived(module.exercices[0] ? relatif(module.exercices[0].fichier) : '');
+	const commandeEtape = (c: string) => c.replace('{exercice}', exemple);
+
 	// Le niveau d'un exercice porte une couleur constante dans tout le parcours : guidé = on
 	// t'accompagne, seul = tu produis, défi = tu dois chercher.
 	const variantNiveau: Record<Niveau, 'vert' | 'bleu' | 'orange'> = {
@@ -29,11 +40,32 @@
 	};
 </script>
 
-<Shell
-	active="parcours"
-	title="Module {module.num} — {module.titre}"
-	breadcrumb={['Parcours', `Phase ${phase.id} · ${phase.titre}`, `Module ${module.num}`]}
->
+{#snippet navigation(place: string)}
+	<nav class="navigation" aria-label="Modules voisins ({place})">
+		{#if data.precedent}
+			<Button href="/module/{data.precedent.slug}" variant="blanc" size="sm">
+				<CircleArrowLeft size={16} />
+				{data.precedent.num}. {data.precedent.titre}
+			</Button>
+		{:else}
+			<Button href="/" variant="blanc" size="sm">
+				<CircleArrowLeft size={16} />
+				Parcours
+			</Button>
+		{/if}
+
+		{#if data.suivant}
+			<Button href="/module/{data.suivant.slug}" variant="blanc" size="sm">
+				{data.suivant.num}. {data.suivant.titre}
+				<CircleArrowRight size={16} />
+			</Button>
+		{/if}
+	</nav>
+{/snippet}
+
+<Shell active="parcours" title="Module {module.num} — {module.titre}">
+	{@render navigation('haut')}
+
 	<header class="entete">
 		<div class="entete-texte">
 			<div class="ligne-badges">
@@ -106,6 +138,31 @@
 	</section>
 
 	<section>
+		<h2 class="avec-icone">
+			<Terminal size={17} aria-hidden="true" />
+			Où écrire, comment lancer
+		</h2>
+		<p class="sous">
+			Le même geste à tous les modules. Tant qu'il n'est pas automatique, garde cette liste sous les
+			yeux — buter sur la commande n'apprend rien du C.
+		</p>
+		<ol class="lancement">
+			{#each LANCEMENT as etape, i (etape.titre)}
+				<li>
+					<span class="rang" style="background: {phase.couleur}">{i + 1}</span>
+					<div class="etape">
+						<strong>{etape.titre}</strong>
+						<p>{etape.detail}</p>
+						{#if etape.commande}
+							<code class="commande">{commandeEtape(etape.commande)}</code>
+						{/if}
+					</div>
+				</li>
+			{/each}
+		</ol>
+	</section>
+
+	<section>
 		<h2>Les exercices</h2>
 		<p class="sous">
 			À taper à la main, dans le fichier indiqué, compilés avec
@@ -123,8 +180,14 @@
 					<Card.Content>
 						<p class="enonce">{exercice.enonce}</p>
 						<div class="fichier">
-							<FileCode size={13} aria-hidden="true" />
-							<code>{exercice.fichier}</code>
+							<div class="ligne">
+								<FileCode size={13} aria-hidden="true" />
+								<code>{exercice.fichier}</code>
+							</div>
+							<div class="ligne">
+								<Terminal size={13} aria-hidden="true" />
+								<code>{commandeExercice(exercice.fichier)}</code>
+							</div>
 						</div>
 					</Card.Content>
 				</Card.Root>
@@ -155,23 +218,7 @@
 		{/if}
 	</section>
 
-	<nav class="navigation" aria-label="Modules voisins">
-		{#if data.precedent}
-			<Button href="/module/{data.precedent.slug}" variant="blanc" size="sm">
-				<ArrowLeft size={15} />
-				{data.precedent.num}. {data.precedent.titre}
-			</Button>
-		{:else}
-			<span></span>
-		{/if}
-
-		{#if data.suivant}
-			<Button href="/module/{data.suivant.slug}" variant="blanc" size="sm">
-				{data.suivant.num}. {data.suivant.titre}
-				<ArrowRight size={15} />
-			</Button>
-		{/if}
-	</nav>
+	{@render navigation('bas')}
 </Shell>
 
 <style>
@@ -230,7 +277,6 @@
 	}
 
 	.sous {
-		max-width: 78ch;
 		margin: -4px 0 12px;
 		color: var(--color-on-surface-muted);
 		font-size: 13px;
@@ -254,7 +300,7 @@
 
 	.notion {
 		padding: 14px 16px;
-		border: 1px solid var(--color-border);
+		border: 1px solid var(--color-on-surface);
 		border-radius: 10px;
 		background: var(--color-surface);
 	}
@@ -324,11 +370,79 @@
 
 	.fichier {
 		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		padding-top: 8px;
+		color: var(--color-on-surface-muted);
+	}
+
+	.fichier .ligne {
+		display: flex;
 		align-items: center;
 		gap: 6px;
-		padding-top: 8px;
-		border-top: 1px dashed var(--color-border);
+	}
+
+	.lancement {
+		display: flex;
+		flex-direction: column;
+		gap: 14px;
+		margin: 0;
+		padding: 16px 18px;
+		border: 1px solid var(--color-on-surface);
+		border-radius: 12px;
+		background: var(--color-surface);
+		list-style: none;
+	}
+
+	.lancement li {
+		display: flex;
+		gap: 12px;
+	}
+
+	.rang {
+		display: inline-flex;
+		flex-shrink: 0;
+		align-items: center;
+		justify-content: center;
+		width: 22px;
+		height: 22px;
+		border-radius: 999px;
+		color: #fff;
+		font-family: var(--font-mono);
+		font-size: 11.5px;
+		font-weight: 600;
+	}
+
+	.etape {
+		display: flex;
+		flex-direction: column;
+		gap: 5px;
+		min-width: 0;
+	}
+
+	.etape strong {
+		font-size: 13.5px;
+	}
+
+	.etape p {
+		margin: 0;
 		color: var(--color-on-surface-muted);
+		font-size: 13px;
+		line-height: 1.55;
+	}
+
+	/* La commande déborde dans son cadre, jamais dans la page. */
+	.commande {
+		align-self: flex-start;
+		max-width: 100%;
+		overflow-x: auto;
+		padding: 5px 9px;
+		border-radius: 6px;
+		background: var(--color-code-bg);
+		color: var(--color-code-text);
+		font-family: var(--font-mono);
+		font-size: 12px;
+		white-space: pre;
 	}
 
 	.fichier code {
@@ -341,8 +455,6 @@
 		display: flex;
 		justify-content: space-between;
 		gap: 12px;
-		padding-top: 12px;
-		border-top: 1px solid var(--color-border);
 	}
 
 	@media (max-width: 860px) {

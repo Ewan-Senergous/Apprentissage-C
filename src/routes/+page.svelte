@@ -1,12 +1,13 @@
 <script lang="ts">
 	import ArrowRight from '@lucide/svelte/icons/arrow-right';
+	import CircleArrowRight from '@lucide/svelte/icons/circle-arrow-right';
 	import Compass from '@lucide/svelte/icons/compass';
 	import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
 	import { Shell, ModuleCard, ProgressBar } from '$lib/components';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Badge } from '$lib/components/ui/badge';
-	import { MODULES, PHASES, TOTAL_CHECKPOINTS, modulesParPhase } from '$lib/data/curriculum';
+	import { PHASES, TOTAL_CHECKPOINTS, modulesParPhase } from '$lib/data/curriculum';
 	import { RYTHMES } from '$lib/data/methode';
 	import { progression } from '$lib/progress.svelte';
 
@@ -33,9 +34,9 @@
 			<div class="hero-actions">
 				<Button href="/module/{courant.slug}" variant="bleu">
 					{progression.total === 0 ? 'Commencer le module 1' : `Reprendre au module ${courant.num}`}
-					<ArrowRight size={16} />
+					<CircleArrowRight size={18} />
 				</Button>
-				<Button href="/methode" variant="blanc">
+				<Button href="/methode" variant="noir">
 					<Compass size={16} />
 					Comment apprendre efficacement
 				</Button>
@@ -45,9 +46,6 @@
 		<Card.Root class="hero-carte">
 			<Card.Header>
 				<Card.Title>Ta progression</Card.Title>
-				<Card.Description>
-					Cochée sur cette machine, dans ce navigateur. Rien n'est envoyé nulle part.
-				</Card.Description>
 			</Card.Header>
 			<Card.Content class="flex flex-col gap-4">
 				<div class="stats">
@@ -93,12 +91,13 @@
 		<section class="phase">
 			<header class="phase-tete">
 				<span class="phase-puce" style="background: {phase.couleur}" aria-hidden="true"></span>
-				<div>
-					<h2>Phase {phase.id} — {phase.titre}</h2>
-					<span class="phase-sous">{phase.sousTitre}</span>
-				</div>
+				<h2>Phase {phase.id} — {phase.titre}</h2>
 			</header>
-			<p class="phase-but">{phase.but}</p>
+			<div class="phase-but">
+				{#each phase.but as ligne (ligne)}
+					<p>{ligne}</p>
+				{/each}
+			</div>
 
 			<div class="grille">
 				{#each modulesParPhase(phase.id) as module (module.slug)}
@@ -133,11 +132,6 @@
 			{/each}
 		</div>
 	</section>
-
-	<footer class="pied-page">
-		{MODULES.length} modules · {TOTAL_CHECKPOINTS} critères de validation · les exercices se codent dans
-		<code>exercices/</code>, à la racine du dépôt.
-	</footer>
 </Shell>
 
 <style>
@@ -145,12 +139,17 @@
 		display: grid;
 		grid-template-columns: 1.4fr 1fr;
 		gap: 24px;
-		align-items: start;
+		/* Les deux colonnes commencent et finissent sur la même ligne, quelle que soit
+		   celle qui est la plus haute. */
+		align-items: stretch;
 	}
 
 	.hero-texte {
 		display: flex;
 		flex-direction: column;
+		/* space-between répartit le rab de hauteur à parts égales entre les trois écarts :
+		   la colonne remplit la hauteur de la carte sans qu'un bloc respire plus qu'un autre. */
+		justify-content: space-between;
 		gap: 12px;
 	}
 
@@ -174,7 +173,6 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: 8px;
-		margin-top: 4px;
 	}
 
 	.stats {
@@ -267,14 +265,16 @@
 
 	.phase-tete {
 		display: flex;
-		align-items: center;
+		/* stretch et non center : le filet couvre exactement le bloc titre + sous-titre, donc son
+		   haut s'aligne sur la ligne du titre quel que soit le nombre de lignes. */
+		align-items: stretch;
 		gap: 10px;
 	}
 
 	.phase-puce {
-		width: 10px;
-		height: 28px;
-		border-radius: 3px;
+		flex-shrink: 0;
+		width: 4px;
+		border-radius: 2px;
 	}
 
 	.phase h2,
@@ -284,15 +284,14 @@
 		font-weight: 600;
 	}
 
-	.phase-sous {
-		color: var(--color-on-surface-muted);
-		font-size: 11.5px;
-		font-family: var(--font-mono);
+	.phase-but {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
 	}
 
-	.phase-but,
+	.phase-but p,
 	.sous {
-		max-width: 78ch;
 		margin: 0;
 		color: var(--color-on-surface-muted);
 		font-size: 13.5px;
@@ -329,18 +328,6 @@
 		color: var(--color-on-surface-muted);
 		font-size: 12.5px;
 		line-height: 1.5;
-	}
-
-	.pied-page {
-		padding-top: 8px;
-		border-top: 1px solid var(--color-border);
-		color: var(--color-on-surface-muted);
-		font-size: 12px;
-	}
-
-	.pied-page code {
-		font-family: var(--font-mono);
-		font-size: 11.5px;
 	}
 
 	@media (max-width: 860px) {

@@ -13,8 +13,8 @@ export type PhaseId = 1 | 2 | 3;
 export type Phase = {
 	id: PhaseId;
 	titre: string;
-	sousTitre: string;
-	but: string;
+	/** Une entrée = une ligne : la dernière phrase (la chute) tombe sur sa propre ligne. */
+	but: string[];
 	couleur: string;
 };
 
@@ -46,22 +46,28 @@ export const PHASES: Phase[] = [
 	{
 		id: 1,
 		titre: 'Fondations',
-		sousTitre: 'Modules 1 à 4',
-		but: "Écrire, compiler et faire tourner un programme qui calcule quelque chose. Rien d'exotique : c'est la base commune à tous les langages, apprise avec la rigueur du C.",
+		but: [
+			'Écrire, compiler et faire tourner un programme qui calcule quelque chose.',
+			"Rien d'exotique : c'est la base commune à tous les langages, apprise avec la rigueur du C."
+		],
 		couleur: 'var(--color-phase-1)'
 	},
 	{
 		id: 2,
 		titre: 'Le cœur du C',
-		sousTitre: 'Modules 5 à 8',
-		but: "La mémoire. C'est CE qui distingue le C des autres langages, et la seule partie où il faut vraiment ralentir. Un mois passé ici vaut mieux que trois mois de survol.",
+		but: [
+			"La mémoire. C'est CE qui distingue le C des autres langages, et la seule partie où il faut vraiment ralentir.",
+			'Un mois passé ici vaut mieux que trois mois de survol.'
+		],
 		couleur: 'var(--color-phase-2)'
 	},
 	{
 		id: 3,
 		titre: 'Programmes réels',
-		sousTitre: 'Modules 9 à 13',
-		but: 'Sortir du fichier unique : fichiers, compilation séparée, structures de données, débogage. À la fin, un vrai projet livrable.',
+		but: [
+			'Sortir du fichier unique : fichiers, compilation séparée, structures de données, débogage.',
+			'À la fin, un vrai projet livrable.'
+		],
 		couleur: 'var(--color-phase-3)'
 	}
 ];
@@ -75,7 +81,7 @@ export const MODULES: Module[] = [
 		accroche: 'Comprendre ce qui se passe entre ton .c et l\u2019exécutable.',
 		duree: '3 jours · ~4 h',
 		objectif:
-			'Tu écris un programme dans un fichier, tu le compiles en ligne de commande, tu le lances, et tu sais lire une erreur de compilation sans paniquer.',
+			'Tu écris un programme dans un fichier, tu le compiles en ligne de commande, tu le lances, et tu sais lire une erreur de compilation.',
 		notions: [
 			{
 				nom: 'Le C est compilé, pas interprété',
@@ -117,11 +123,11 @@ export const MODULES: Module[] = [
 		],
 		snippet: {
 			titre: 'Le squelette, à taper de mémoire chaque jour de la semaine',
-			code: `#include <stdio.h>
+			code: String.raw`#include <stdio.h>
 
 int main(void)
 {
-    printf("Bonjour, C.\\n");
+    printf("Bonjour, C.\n");
     return 0;
 }`,
 			note: 'Compilation : gcc -Wall -Wextra -std=c17 -g hello.c -o hello.exe puis ./hello.exe'
@@ -211,15 +217,15 @@ int main(void)
 		],
 		snippet: {
 			titre: 'Ce que « tout est une taille » veut dire',
-			code: `#include <stdio.h>
+			code: String.raw`#include <stdio.h>
 
 int main(void)
 {
     int    n = 7;
     double x = 7.0;
 
-    printf("int    : %zu octets, 7/2 = %d\\n", sizeof(int), n / 2);
-    printf("double : %zu octets, 7/2 = %f\\n", sizeof(double), x / 2);
+    printf("int    : %zu octets, 7/2 = %d\n", sizeof(int), n / 2);
+    printf("double : %zu octets, 7/2 = %f\n", sizeof(double), x / 2);
     return 0;
 }`,
 			note: 'Sortie : 3 côté int, 3.500000 côté double. Le type décide du résultat.'
@@ -399,7 +405,7 @@ int main(void)
 		],
 		snippet: {
 			titre: 'La démonstration qui prépare le module 6',
-			code: `#include <stdio.h>
+			code: String.raw`#include <stdio.h>
 
 void doubler(int x)      /* x est une COPIE */
 {
@@ -410,7 +416,7 @@ int main(void)
 {
     int n = 5;
     doubler(n);
-    printf("%d\\n", n);   /* affiche 5, pas 10 */
+    printf("%d\n", n);   /* affiche 5, pas 10 */
     return 0;
 }`,
 			note: 'Tant que ce 5 te surprend, ne passe pas au module suivant. Quand il te paraît évident, tu es prêt pour les pointeurs.'
@@ -452,8 +458,7 @@ int main(void)
 		titre: 'Tableaux et chaînes de caractères',
 		accroche: "Une chaîne en C n'existe pas. C'est un tableau de char qui finit par un zéro.",
 		duree: '1 semaine · ~7 h',
-		objectif:
-			"Tu manipules des tableaux 1D et 2D, tu comprends qu'une chaîne C est un tableau terminé par \\0, et tu utilises string.h sans déborder.",
+		objectif: String.raw`Tu manipules des tableaux 1D et 2D, tu comprends qu'une chaîne C est un tableau terminé par \0, et tu utilises string.h sans déborder.`,
 		notions: [
 			{
 				nom: 'Tableau à taille fixe',
@@ -471,19 +476,16 @@ int main(void)
 					'sizeof(tab) donne la taille totale DANS la fonction où le tableau est déclaré, mais pas dans une fonction qui le reçoit. Il faut donc TOUJOURS passer la taille en second paramètre : void afficher(int tab[], int n).'
 			},
 			{
-				nom: 'La chaîne = tableau de char + \\0',
-				detail:
-					'char mot[] = "salut"; occupe 6 octets, pas 5 : le \\0 final marque la fin. Toutes les fonctions de <string.h> s\'arrêtent à ce zéro. Sans lui, elles lisent jusqu\'au crash.'
+				nom: String.raw`La chaîne = tableau de char + \0`,
+				detail: String.raw`char mot[] = "salut"; occupe 6 octets, pas 5 : le \0 final marque la fin. Toutes les fonctions de <string.h> s'arrêtent à ce zéro. Sans lui, elles lisent jusqu'au crash.`
 			},
 			{
 				nom: 'string.h',
-				detail:
-					'strlen (longueur SANS le \\0), strcpy, strcmp (0 = égales !), strcat, strchr. Préfère snprintf et les variantes bornées quand tu as le choix : les versions non bornées écrivent au-delà de ta case si la source est trop longue.'
+				detail: String.raw`strlen (longueur SANS le \0), strcpy, strcmp (0 = égales !), strcat, strchr. Préfère snprintf et les variantes bornées quand tu as le choix : les versions non bornées écrivent au-delà de ta case si la source est trop longue.`
 			},
 			{
 				nom: 'Lire une ligne',
-				detail:
-					'Utilise fgets(buffer, sizeof buffer, stdin) — jamais gets, retiré du langage car faille de sécurité par construction. fgets garde le \\n : à retirer à la main.'
+				detail: String.raw`Utilise fgets(buffer, sizeof buffer, stdin) — jamais gets, retiré du langage car faille de sécurité par construction. fgets garde le \n : à retirer à la main.`
 			}
 		],
 		pieges: [
@@ -504,19 +506,19 @@ int main(void)
 			}
 		],
 		snippet: {
-			titre: 'Le \\0 rendu visible',
-			code: `#include <stdio.h>
+			titre: String.raw`Le \0 rendu visible`,
+			code: String.raw`#include <stdio.h>
 #include <string.h>
 
 int main(void)
 {
     char mot[20] = "salut";
 
-    printf("sizeof = %zu\\n", sizeof(mot));  /* 20 : la boite  */
-    printf("strlen = %zu\\n", strlen(mot));  /*  5 : le contenu */
+    printf("sizeof = %zu\n", sizeof(mot));  /* 20 : la boite  */
+    printf("strlen = %zu\n", strlen(mot));  /*  5 : le contenu */
 
     for (size_t i = 0; i < 7; i++)
-        printf("[%zu] = %d\\n", i, mot[i]);  /* mot[5] vaut 0   */
+        printf("[%zu] = %d\n", i, mot[i]);  /* mot[5] vaut 0   */
 
     return 0;
 }`,
@@ -547,7 +549,7 @@ int main(void)
 		],
 		checkpoint: [
 			'Je passe systématiquement la taille avec le tableau',
-			'Je sais dessiner « salut » en mémoire, case par case, avec le \\0',
+			String.raw`Je sais dessiner « salut » en mémoire, case par case, avec le \0`,
 			"J'utilise strcmp (== 0) et jamais == pour comparer des chaînes",
 			'Je sais pourquoi fgets est préférable à scanf pour lire une ligne'
 		]
@@ -612,7 +614,7 @@ int main(void)
 		],
 		snippet: {
 			titre: 'Le module 4 réparé',
-			code: `#include <stdio.h>
+			code: String.raw`#include <stdio.h>
 
 void doubler(int *x)      /* on copie l'ADRESSE */
 {
@@ -622,9 +624,9 @@ void doubler(int *x)      /* on copie l'ADRESSE */
 int main(void)
 {
     int n = 5;
-    printf("n vaut %d, il est en %p\\n", n, (void *)&n);
+    printf("n vaut %d, il est en %p\n", n, (void *)&n);
     doubler(&n);
-    printf("n vaut %d\\n", n);   /* 10 */
+    printf("n vaut %d\n", n);   /* 10 */
     return 0;
 }`,
 			note: 'Dessine ça sur papier : une case « n » contenant 5, une case « x » contenant la flèche. Refais le dessin pour chaque exercice de ce module.'
@@ -646,8 +648,7 @@ int main(void)
 			},
 			{
 				titre: 'Parcours sans crochets',
-				enonce:
-					'Réécris tes fonctions de stats du module 5 sans AUCUN [] : uniquement *(p + i) ou un pointeur qu\u2019on incrémente. Puis mon_strlen avec un pointeur qui avance jusqu\u2019au \\0.',
+				enonce: String.raw`Réécris tes fonctions de stats du module 5 sans AUCUN [] : uniquement *(p + i) ou un pointeur qu’on incrémente. Puis mon_strlen avec un pointeur qui avance jusqu’au \0.`,
 				niveau: 'défi',
 				fichier: 'exercices/06-pointeurs/arithmetique.c'
 			}
@@ -829,7 +830,7 @@ int main(void)
 		],
 		snippet: {
 			titre: 'Un type métier, comme dans un vrai programme',
-			code: `#include <stdio.h>
+			code: String.raw`#include <stdio.h>
 
 typedef enum { ACTIF, ARCHIVE } Statut;
 
@@ -842,7 +843,7 @@ typedef struct {
 /* const : lecture seule, garantie par le compilateur */
 void afficher(const Contact *c)
 {
-    printf("%-20s %3d  %s\\n", c->nom, c->age,
+    printf("%-20s %3d  %s\n", c->nom, c->age,
            c->statut == ACTIF ? "actif" : "archive");
 }
 
@@ -901,13 +902,11 @@ int main(void)
 			},
 			{
 				nom: 'Lire ligne par ligne',
-				detail:
-					'while (fgets(ligne, sizeof ligne, f) != NULL) { ... } est la boucle canonique ; fgets renvoie NULL en fin de fichier. Elle conserve le \\n : ligne[strcspn(ligne, "\\n")] = \'\\0\'; le retire proprement.'
+				detail: String.raw`while (fgets(ligne, sizeof ligne, f) != NULL) { ... } est la boucle canonique ; fgets renvoie NULL en fin de fichier. Elle conserve le \n : ligne[strcspn(ligne, "\n")] = '\0'; le retire proprement.`
 			},
 			{
 				nom: 'Écrire',
-				detail:
-					"fprintf(f, \"%s;%d\\n\", nom, age) s'utilise exactement comme printf, avec le flux en premier argument. printf(...) n'est rien d'autre que fprintf(stdout, ...)."
+				detail: String.raw`fprintf(f, "%s;%d\n", nom, age) s'utilise exactement comme printf, avec le flux en premier argument. printf(...) n'est rien d'autre que fprintf(stdout, ...).`
 			},
 			{
 				nom: 'Découper une ligne',
@@ -944,13 +943,13 @@ int main(void)
 		],
 		snippet: {
 			titre: 'La boucle de lecture à connaître par cœur',
-			code: `#include <stdio.h>
+			code: String.raw`#include <stdio.h>
 #include <string.h>
 
 int main(int argc, char *argv[])
 {
     if (argc < 2) {
-        fprintf(stderr, "usage: %s <fichier>\\n", argv[0]);
+        fprintf(stderr, "usage: %s <fichier>\n", argv[0]);
         return 1;
     }
 
@@ -963,8 +962,8 @@ int main(int argc, char *argv[])
     char ligne[256];
     int  n = 0;
     while (fgets(ligne, sizeof ligne, f) != NULL) {
-        ligne[strcspn(ligne, "\\n")] = '\\0';
-        printf("%3d | %s\\n", ++n, ligne);
+        ligne[strcspn(ligne, "\n")] = '\0';
+        printf("%3d | %s\n", ++n, ligne);
     }
 
     fclose(f);
@@ -1176,11 +1175,11 @@ clean:
 		],
 		snippet: {
 			titre: 'Le parcours et la libération, les deux gestes de base',
-			code: `void afficher(const Noeud *tete)
+			code: String.raw`void afficher(const Noeud *tete)
 {
     for (const Noeud *p = tete; p != NULL; p = p->suivant)
         printf("%d -> ", p->valeur);
-    printf("NULL\\n");
+    printf("NULL\n");
 }
 
 void detruire(Noeud *tete)
@@ -1255,8 +1254,7 @@ void detruire(Noeud *tete)
 			},
 			{
 				nom: 'Tester sans framework',
-				detail:
-					'Un fichier tests.c avec un main qui appelle tes fonctions sur des cas connus et compare : if (somme(2,3) != 5) printf("ECHEC somme\\n");. Ajoute une cible make test. Ça suffit largement à ce stade.'
+				detail: String.raw`Un fichier tests.c avec un main qui appelle tes fonctions sur des cas connus et compare : if (somme(2,3) != 5) printf("ECHEC somme\n");. Ajoute une cible make test. Ça suffit largement à ce stade.`
 			},
 			{
 				nom: 'Style et lisibilité',

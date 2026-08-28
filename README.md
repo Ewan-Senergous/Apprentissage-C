@@ -44,18 +44,25 @@ wsl -d Ubuntu -- gcc --version
 ```powershell
 winget install --id MSYS2.MSYS2 -e
 & C:\msys64\usr\bin\bash.exe -lc "pacman -S --needed --noconfirm mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-gdb mingw-w64-ucrt-x86_64-make"
-[Environment]::SetEnvironmentVariable('Path', [Environment]::GetEnvironmentVariable('Path','User') + ';C:\msys64\ucrt64\bin', 'User')
+[Environment]::SetEnvironmentVariable('Path', 'C:\msys64\ucrt64\bin;' + [Environment]::GetEnvironmentVariable('Path','User'), 'User')
 Copy-Item C:\msys64\ucrt64\bin\mingw32-make.exe C:\msys64\ucrt64\bin\make.exe
 ```
 
-Trois pièges, tous rencontrés pour de vrai :
+Quatre pièges, tous rencontrés pour de vrai :
 
 - le préfixe **`mingw-w64-ucrt-x86_64-`** est obligatoire sur les **trois** paquets. Le paquet
   `make` tout court appartient à l'environnement MSYS (`usr/bin`), qui n'est pas dans le PATH ;
 - le paquet mingw installe `mingw32-make.exe`, d'où la copie sous le nom `make.exe` — on garde
   les deux, CMake et l'extension makefile-tools cherchent le premier ;
 - **ne jamais mettre `usr/bin` dans le PATH** : ses `find.exe` et `sort.exe` masqueraient les
-  commandes Windows du même nom.
+  commandes Windows du même nom ;
+- **`C:\msys64\ucrt64\bin` doit passer AVANT les autres entrées du PATH** — d'où le
+  préfixe ci-dessus, et surtout pas un ajout en queue. PostgreSQL et MySQL livrent leurs
+  propres `libwinpthread-1.dll`, `libzstd.dll`, `zlib1.dll` et `libiconv-2.dll` ; si leur
+  dossier est trouvé en premier, `cc1.exe` charge ces DLL-là et meurt sur `0xC0000139`
+  (*entry point not found*) **sans afficher une seule ligne**. Symptôme trompeur :
+  `gcc --version` répond normalement — le pilote va bien, c'est le compilateur derrière lui
+  qui ne démarre pas. Vérifier l'ordre avec `$env:Path -split ';'`.
 
 ### Remonter la chaîne WSL
 
