@@ -136,7 +136,7 @@ int main(void)
 			{
 				titre: 'Hello, compilé à la main',
 				enonce:
-					"Tape le squelette ci-dessus SANS copier-coller, compile-le, lance-le. Puis casse-le volontairement de 3 façons (enlève le point-virgule, enlève l'include, écris Main au lieu de main) et NOTE le message d'erreur exact de chacune dans ton carnet.",
+					"Tape le squelette ci-dessus SANS copier-coller, compile-le, lance-le. Puis casse-le volontairement de 3 façons (enlève le point-virgule, enlève l'include, écris Main au lieu de main) et NOTE le message d'erreur exact de chacune dans ton JOURNAL.md, à la racine du dépôt.",
 				niveau: 'guidé',
 				fichier: 'exercices/01-compilation/hello.c'
 			},

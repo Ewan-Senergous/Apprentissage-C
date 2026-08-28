@@ -19,3 +19,5 @@ Modèle à recopier :
 - **Fait** : dépôt du parcours créé, site lancé avec `pnpm dev`.
 - **Bloqué sur** : —
 - **Compris** : reste à installer gcc (voir la page Installation) avant le module 1.
+
+## 2026-08-28 — Module 1

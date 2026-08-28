@@ -60,7 +60,7 @@ Quatre pièges, tous rencontrés pour de vrai :
   préfixe ci-dessus, et surtout pas un ajout en queue. PostgreSQL et MySQL livrent leurs
   propres `libwinpthread-1.dll`, `libzstd.dll`, `zlib1.dll` et `libiconv-2.dll` ; si leur
   dossier est trouvé en premier, `cc1.exe` charge ces DLL-là et meurt sur `0xC0000139`
-  (*entry point not found*) **sans afficher une seule ligne**. Symptôme trompeur :
+  (_entry point not found_) **sans afficher une seule ligne**. Symptôme trompeur :
   `gcc --version` répond normalement — le pilote va bien, c'est le compilateur derrière lui
   qui ne démarre pas. Vérifier l'ordre avec `$env:Path -split ';'`.
 
